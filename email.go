@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"emanager/pkg/config"
 	"net/smtp"
 	"strings"
 )
@@ -11,10 +10,7 @@ import (
  *  subject:The subject of mail
  *  body: The content of mail
  */
-func SendMail(to string, subject string, body string) error {
-	user := config.Config.EmailNotification.Username
-	password := config.Config.EmailNotification.Password
-	host := config.Config.EmailNotification.Host
+func SendMail(user, password, host, to string, subject string, body string) error {
 
 	hp := strings.Split(host, ":")
 	auth := smtp.PlainAuth("", user, password, hp[0])
