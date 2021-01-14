@@ -241,6 +241,7 @@ func ArrayToStr(arr []interface{}) string {
 	}
 	return result
 }
+
 func ArrayToString(arr []string) string {
 	var result string
 	for _, i := range arr { //遍历数组中所有元素追加成string
