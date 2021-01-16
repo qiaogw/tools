@@ -3,6 +3,7 @@ package tools
 import (
 	"bytes"
 	"crypto/rand"
+	"fmt"
 	"math/big"
 
 	uuid "github.com/satori/go.uuid"
@@ -196,9 +197,10 @@ func GetList(pTree map[string]interface{}, pList *[]interface{}) {
 //	}
 //}
 
+// UUID based on timestamp, MAC address and POSIX UID/GID (DCE 1.1)
 func UUID() string {
 	var err error
-	return uuid.Must(uuid.NewV4(), err).String()
+	return uuid.Must(uuid.NewV2(), err).String()
 }
 
 // StringInSlice 检查数组slice中是否包含字符串v
@@ -227,13 +229,14 @@ func StringsJoin(strs ...string) string {
 
 }
 
+// ArrayToStr 数组转str，","为分隔符
 func ArrayToStr(arr []interface{}) string {
 	result := ""
 	for i, v := range arr {
 		if v == nil {
 			result += "NULL"
 		} else {
-			result += "'" + v.(string) + "'"
+			result += fmt.Sprint(v)
 		}
 		if i < len(arr)-1 {
 			result += ","
@@ -242,6 +245,7 @@ func ArrayToStr(arr []interface{}) string {
 	return result
 }
 
+// ArrayToString 数组转str，"/"为分隔符
 func ArrayToString(arr []string) string {
 	var result string
 	for _, i := range arr { //遍历数组中所有元素追加成string
