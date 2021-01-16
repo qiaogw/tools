@@ -197,7 +197,7 @@ func GetList(pTree map[string]interface{}, pList *[]interface{}) {
 //	}
 //}
 
-// UUID based on timestamp, MAC address and POSIX UID/GID (DCE 1.1)
+// UUID based on timestamp, MAC address
 func UUID() string {
 	var err error
 	return uuid.Must(uuid.NewV1(), err).String()
