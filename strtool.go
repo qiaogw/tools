@@ -200,7 +200,7 @@ func GetList(pTree map[string]interface{}, pList *[]interface{}) {
 // UUID based on timestamp, MAC address and POSIX UID/GID (DCE 1.1)
 func UUID() string {
 	var err error
-	return uuid.Must(uuid.NewV2(), err).String()
+	return uuid.Must(uuid.NewV1(), err).String()
 }
 
 // StringInSlice 检查数组slice中是否包含字符串v
