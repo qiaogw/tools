@@ -48,14 +48,17 @@ func EncodeToken(sessionid string) string {
 	return MD5([]byte(strings.Join([]string{sessionid, "$token$", timez}, "")))
 }
 
-// Struct2Map stuct 转 map
-func Struct2Map(obj interface{}) map[string]interface{} {
+// Struct2Map stuct 转 map by tagName
+func Struct2Map(obj interface{}, tagName string) map[string]interface{} {
 	t := reflect.TypeOf(obj)
 	v := reflect.ValueOf(obj)
 
 	var data = make(map[string]interface{})
 	for i := 0; i < t.NumField(); i++ {
-		data[t.Field(i).Name] = v.Field(i).Interface()
+		tagName := t.Field(i).Tag.Get(tagName)
+		if tagName != "" && tagName != "-" {
+			data[tagName] = v.Field(i).Interface()
+		}
 	}
 	return data
 }
@@ -66,7 +69,7 @@ func GetGuid() string {
 	return uid.String()
 }
 
-// 生成长度为length的随机字符串
+// RandString 生成长度为length的随机字符串
 func RandString(length int64) string {
 	sources := []byte("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	var result []byte
