@@ -200,7 +200,7 @@ func WriteFile(path, info string, coverType bool) (err error) {
 		flag = os.O_APPEND | os.O_WRONLY
 	}
 	if CheckFileIsExist(path) { //如果文件存在
-		fl, err = os.OpenFile(path, flag, 0666) //打开文件
+		fl, err = os.OpenFile(path, flag, os.ModePerm) //打开文件
 	} else {
 		fl, err = os.Create(path) //创建文件
 	}
