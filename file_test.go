@@ -41,7 +41,7 @@ func TestLockOrDie(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	lf := LockOrDie(dir)
+	lf, _ := LockOrDie(dir)
 	err = os.Remove(file)
 	if err != nil {
 		t.Errorf("lock succes ,info  is %v", err)

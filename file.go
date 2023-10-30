@@ -3,6 +3,7 @@ package tools
 import (
 	"bufio"
 	"errors"
+	"github.com/theckman/go-flock"
 	"io"
 	"io/ioutil"
 	"os"
@@ -71,7 +72,7 @@ func PathExists(path string) (bool, error) {
 
 // GetAllFile 获取pathname路径下所有扩展名为suffix的文件名数组
 func GetAllFile(pathname string, suffix string) (fileSlice []string) {
-	rd, err := ioutil.ReadDir(pathname)
+	rd, err := os.ReadDir(pathname)
 	if err != nil {
 		return
 	}
@@ -94,11 +95,11 @@ func GetAllFile(pathname string, suffix string) (fileSlice []string) {
 	return
 }
 
-/** CopyDir
- * 拷贝文件夹,同时拷贝文件夹中的文件
- * @param srcPath  		需要拷贝的文件夹路径: D:/test
- * @param destPath		拷贝到的位置: D:/backup/
- */
+// CopyDir
+// * 拷贝文件夹,同时拷贝文件夹中的文件
+// * @param srcPath  		需要拷贝的文件夹路径: D:/test
+// * @param destPath		拷贝到的位置: D:/backup/
+// */
 func CopyDir(srcPath string, destPath string) error {
 	//检测目录正确性
 	if srcInfo, err := os.Stat(srcPath); err != nil {
@@ -127,16 +128,19 @@ func CopyDir(srcPath string, destPath string) error {
 			return err
 		}
 		if !f.IsDir() {
-			path := strings.Replace(path, "\\", "/", -1)
-			destNewPath := strings.Replace(path, srcPath, destPath, -1)
-			CopyFile(path, destNewPath)
+			pth := strings.Replace(path, "\\", "/", -1)
+			destNewPath := strings.Replace(pth, srcPath, destPath, -1)
+			_, err = CopyFile(pth, destNewPath)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
 	return err
 }
 
-// 生成目录并拷贝文件
+// CopyFile 生成目录并拷贝文件
 func CopyFile(src, dest string) (w int64, err error) {
 	srcFile, err := os.Open(src)
 	if err != nil {
@@ -154,7 +158,7 @@ func CopyFile(src, dest string) (w int64, err error) {
 			b, _ := PathExists(destSplitPath)
 			if !b {
 				//创建目录
-				err := os.Mkdir(destSplitPath, os.ModePerm)
+				err = os.Mkdir(destSplitPath, os.ModePerm)
 				if err != nil {
 					return w, err
 				}
@@ -169,7 +173,7 @@ func CopyFile(src, dest string) (w int64, err error) {
 	return io.Copy(dstFile, srcFile)
 }
 
-// 解析text文件内容
+// ReadFile 解析text文件内容
 func ReadFile(path string) (str string, err error) {
 	//打开文件的路径
 	fi, err := os.Open(path)
@@ -216,7 +220,7 @@ func WriteFile(path, info string, coverType bool) (err error) {
 	return
 }
 
-// WriteFile 写入Byte文件内容
+// WriteFileByte 写入Byte文件内容
 // coverType true 覆盖写入，false 追加写入
 func WriteFileByte(path string, info []byte, coverType bool) (err error) {
 	var fl *os.File
@@ -243,9 +247,8 @@ func WriteFileByte(path string, info []byte, coverType bool) (err error) {
 	return
 }
 
-/**
- * 判断文件是否存在  存在返回 true 不存在返回false
- */
+// CheckFileIsExist
+// * 判断文件是否存在  存在返回 true 不存在返回false
 func CheckFileIsExist(filename string) bool {
 	var exist = true
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
@@ -254,23 +257,20 @@ func CheckFileIsExist(filename string) bool {
 	return exist
 }
 
+//GetDirList 获取文件夹树状
 func GetDirList(dirpath, pathStr string) []DirBody {
 	var allFile []DirBody
 	finfo, _ := ioutil.ReadDir(dirpath)
-	//info, _ := os.Stat(dirpath)
-	//allFile.Label = info.Name()
-	//chiledrens := make([]DirBody, 0)
 	for _, x := range finfo {
-		//var dirInfo DirBody
-		var chiledren DirBody
+		var children DirBody
 		if x.IsDir() {
 			realPath := filepath.Join(dirpath, x.Name())
 			realDir := filepath.Join(pathStr, x.Name())
-			chiledren.Label = x.Name()
-			chiledren.Dir = realDir
-			chiledren.Icon = "el-icon-folder"
-			chiledren.Children = append(chiledren.Children, GetDirList(realPath, realDir)...)
-			allFile = append(allFile, chiledren)
+			children.Label = x.Name()
+			children.Dir = realDir
+			children.Icon = "el-icon-folder"
+			children.Children = append(children.Children, GetDirList(realPath, realDir)...)
+			allFile = append(allFile, children)
 		}
 	}
 	return allFile
@@ -283,12 +283,10 @@ type DirBody struct {
 	Dir      string    `json:"dir"`
 }
 
-// 递归查找空目录
+// FindEmptyFolder 递归查找空目录
 func FindEmptyFolder(dirname string) (emptys []string, err error) {
 	// Golang学习 - io/ioutil 包
-	// https://www.cnblogs.com/golove/p/3278444.html
-
-	files, err := ioutil.ReadDir(dirname)
+	files, err := os.ReadDir(dirname)
 	if err != nil {
 		return nil, err
 	}
@@ -299,25 +297,26 @@ func FindEmptyFolder(dirname string) (emptys []string, err error) {
 
 	for _, file := range files {
 		if file.IsDir() {
-			edirs, err := FindEmptyFolder(path.Join(dirname, file.Name()))
+			dirs, err := FindEmptyFolder(path.Join(dirname, file.Name()))
 			if err != nil {
 				return nil, err
 			}
-			if edirs != nil {
-				emptys = append(emptys, edirs...)
+			if dirs != nil {
+				emptys = append(emptys, dirs...)
 			}
 		}
 	}
 	return emptys, nil
 }
 
-func EmptyFloder(dir string) error {
-	emptys, err := FindEmptyFolder(dir)
+// EmptyFloder 清空文件夹
+func EmptyFloder(dirs string) error {
+	empty, err := FindEmptyFolder(dirs)
 	if err != nil {
 		return err
 	}
-	for _, dir := range emptys {
-		if err := os.Remove(dir); err != nil {
+	for _, dir := range empty {
+		if err = os.Remove(dir); err != nil {
 			return err
 		} else {
 			return err
