@@ -9,11 +9,9 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/theckman/go-flock"
 )
 
-//CheckPath 检查文件夹是否存在，不存在则创建
+// CheckPath 检查文件夹是否存在，不存在则创建
 func CheckPath(logPath string) error {
 	dir := filepath.Dir(logPath)
 	_, err := os.Stat(dir)
@@ -59,7 +57,7 @@ func MakeDirectory(dir string) error {
 	return nil
 }
 
-//PathExists 判断文件夹是否存在
+// PathExists 判断文件夹是否存在
 func PathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -71,7 +69,7 @@ func PathExists(path string) (bool, error) {
 	return false, err
 }
 
-//GetAllFile 获取pathname路径下所有扩展名为suffix的文件名数组
+// GetAllFile 获取pathname路径下所有扩展名为suffix的文件名数组
 func GetAllFile(pathname string, suffix string) (fileSlice []string) {
 	rd, err := ioutil.ReadDir(pathname)
 	if err != nil {
@@ -138,7 +136,7 @@ func CopyDir(srcPath string, destPath string) error {
 	return err
 }
 
-//生成目录并拷贝文件
+// 生成目录并拷贝文件
 func CopyFile(src, dest string) (w int64, err error) {
 	srcFile, err := os.Open(src)
 	if err != nil {
@@ -171,7 +169,7 @@ func CopyFile(src, dest string) (w int64, err error) {
 	return io.Copy(dstFile, srcFile)
 }
 
-//解析text文件内容
+// 解析text文件内容
 func ReadFile(path string) (str string, err error) {
 	//打开文件的路径
 	fi, err := os.Open(path)
@@ -190,14 +188,16 @@ func ReadFile(path string) (str string, err error) {
 	return str, err
 }
 
-//WriteFile 写入text文件内容
-//coverType true 覆盖写入，false 追加写入
+// WriteFile 写入text文件内容
+// coverType true 覆盖写入，false 追加写入
 func WriteFile(path, info string, coverType bool) (err error) {
 
 	var fl *os.File
-	flag := os.O_APPEND | os.O_WRONLY
+	flag := os.O_WRONLY
 	if coverType {
-		flag = os.O_APPEND | os.O_TRUNC | os.O_WRONLY
+		flag = os.O_TRUNC | os.O_WRONLY
+	} else {
+		flag = os.O_APPEND | os.O_WRONLY
 	}
 	if CheckFileIsExist(path) { //如果文件存在
 		fl, err = os.OpenFile(path, flag, 0666) //打开文件
@@ -216,13 +216,15 @@ func WriteFile(path, info string, coverType bool) (err error) {
 	return
 }
 
-//WriteFile 写入Byte文件内容
-//coverType true 覆盖写入，false 追加写入
+// WriteFile 写入Byte文件内容
+// coverType true 覆盖写入，false 追加写入
 func WriteFileByte(path string, info []byte, coverType bool) (err error) {
 	var fl *os.File
-	flag := os.O_APPEND | os.O_WRONLY
+	flag := os.O_WRONLY
 	if coverType {
-		flag = os.O_APPEND | os.O_TRUNC | os.O_WRONLY
+		flag = os.O_TRUNC | os.O_WRONLY
+	} else {
+		flag = os.O_APPEND | os.O_WRONLY
 	}
 	if CheckFileIsExist(path) { //如果文件存在
 		fl, err = os.OpenFile(path, flag, os.ModePerm) //打开文件
@@ -281,7 +283,7 @@ type DirBody struct {
 	Dir      string    `json:"dir"`
 }
 
-//递归查找空目录
+// 递归查找空目录
 func FindEmptyFolder(dirname string) (emptys []string, err error) {
 	// Golang学习 - io/ioutil 包
 	// https://www.cnblogs.com/golove/p/3278444.html

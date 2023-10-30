@@ -5,11 +5,10 @@ import (
 	"strings"
 )
 
-/* SendMail
- *  to: example@example.com;example1@163.com;example2@sina.com.cn;...
- *  subject:The subject of mail
- *  body: The content of mail
- */
+// SendMail
+// *  to: example@example.com;example1@163.com;example2@sina.com.cn;...
+// *  subject:The subject of mail
+// *  body: The content of mail
 func SendMail(user, password, host, to string, subject string, body string) error {
 
 	hp := strings.Split(host, ":")
